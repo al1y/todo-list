@@ -1,0 +1,119 @@
+:root {
+  --bg: #f6f7f9;
+  --card: #ffffff;
+  --text: #1f2328;
+  --muted: #6e7781;
+  --border: #d0d7de;
+  --accent: #0969da;
+  --danger: #cf222e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --danger: #ff7b72;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: start center;
+  padding: 3rem 1rem;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.app {
+  width: 100%;
+  max-width: 480px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+h1 { margin: 0 0 1rem; font-size: 1.5rem; }
+
+.new-todo { display: flex; gap: 0.5rem; }
+
+.new-todo input {
+  flex: 1;
+  padding: 0.6rem 0.75rem;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.new-todo input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+
+button {
+  font: inherit;
+  cursor: pointer;
+  color: inherit;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.9rem;
+}
+
+.new-todo button { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.todo-list { list-style: none; margin: 1rem 0 0; padding: 0; }
+
+.todo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.todo input[type="checkbox"] { width: 1.1rem; height: 1.1rem; cursor: pointer; accent-color: var(--accent); }
+
+.todo .title { flex: 1; word-break: break-word; }
+
+.todo.done .title { text-decoration: line-through; color: var(--muted); }
+
+.todo .remove {
+  border: none;
+  padding: 0.25rem 0.5rem;
+  color: var(--muted);
+  opacity: 0;
+}
+
+.todo:hover .remove, .todo .remove:focus { opacity: 1; }
+.todo .remove:hover { color: var(--danger); }
+
+.empty { padding: 1.5rem 0; text-align: center; color: var(--muted); }
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+
+.filters { display: flex; gap: 0.25rem; }
+
+.filters button { padding: 0.25rem 0.6rem; border-color: transparent; color: var(--muted); }
+.filters button.active { border-color: var(--border); color: var(--text); }
+
+.link { border: none; padding: 0.25rem 0.5rem; color: var(--muted); }
+.link:hover { color: var(--danger); }
+.link[hidden] { display: none; }
