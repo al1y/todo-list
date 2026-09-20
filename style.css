@@ -114,6 +114,6 @@ button {
 .filters button { padding: 0.25rem 0.6rem; border-color: transparent; color: var(--muted); }
 .filters button.active { border-color: var(--border); color: var(--text); }
 
-.link { border: none; padding: 0.25rem 0.5rem; color: var(--muted); }
-.link:hover { color: var(--danger); }
-.link[hidden] { display: none; }
+.clear-completed { margin-top: 0.75rem; color: var(--muted); }
+.clear-completed:hover { color: var(--danger); border-color: var(--danger); }
+.clear-completed[hidden] { display: none; }
