@@ -12,3 +12,5 @@ jobs:
         with:
           node-version: '20'
       - run: node --check app.js
+      - run: node --check game.js
+      - run: node test.cjs
