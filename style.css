@@ -6,6 +6,9 @@
   --border: #d0d7de;
   --accent: #0969da;
   --danger: #cf222e;
+  --blob: #8250df;
+  --arena-floor: #eef1f5;
+  --arena-grid: #dee3ea;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -17,6 +20,9 @@
     --border: #30363d;
     --accent: #58a6ff;
     --danger: #ff7b72;
+    --blob: #bc8cff;
+    --arena-floor: #0b1017;
+    --arena-grid: #1c2430;
   }
 }
 
@@ -35,14 +41,47 @@ body {
 
 .app {
   width: 100%;
-  max-width: 480px;
+  max-width: 620px;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 1.5rem;
 }
 
-h1 { margin: 0 0 1rem; font-size: 1.5rem; }
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+h1 { margin: 0; font-size: 1.5rem; }
+
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.xp-bar {
+  width: 120px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--arena-grid);
+  overflow: hidden;
+}
+
+#xp-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  transition: width 0.25s ease-out;
+}
 
 .new-todo { display: flex; gap: 0.5rem; }
 
@@ -69,6 +108,48 @@ button {
 }
 
 .new-todo button { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.arena {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  margin-top: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--arena-floor);
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.arena-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.hint { margin: 0; font-size: 0.8125rem; color: var(--muted); }
+
+.strike {
+  padding: 0.4rem 1rem;
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.strike:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 
 .todo-list { list-style: none; margin: 1rem 0 0; padding: 0; }
 
@@ -117,3 +198,7 @@ button {
 .clear-completed { margin-top: 0.75rem; color: var(--muted); }
 .clear-completed:hover { color: var(--danger); border-color: var(--danger); }
 .clear-completed[hidden] { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  #xp-fill { transition: none; }
+}
