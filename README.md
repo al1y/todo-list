@@ -7,6 +7,8 @@ A simple todo list. Plain HTML, CSS and JavaScript, no build step, no dependenci
 - Clear completed items
 - Persists in `localStorage`
 - Light and dark mode via `prefers-color-scheme`
+- A completion ring, animated gradient backdrop and glass card
+- Motion honours `prefers-reduced-motion`
 
 ## Run
 
