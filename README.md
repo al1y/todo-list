@@ -25,8 +25,10 @@ lit beacon behind. Finish the lot and the gate at the end of the day lights up.
 | Move | `←` `→` or `A` `D` | on-screen arrows |
 | Jump | `space`, `↑`, `W` or `K` | on-screen **jump** |
 
-Keys are ignored while you are typing in the input. On coarse-pointer devices the
-on-screen pad replaces the keyboard hint and the ground rises to clear the buttons.
+Keys reach the world only while the stage is on screen and nothing else wants
+them: typing in the input wins outright, and `space` stays with a focused button
+so keyboard users can still press one. On coarse-pointer devices the on-screen
+pad replaces the keyboard hint and the ground rises to clear the buttons.
 
 The list below the stage does everything the world does. Nothing is only reachable
 by jumping, so the game is a way to work the list, not a gate in front of it.

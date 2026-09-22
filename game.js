@@ -269,6 +269,8 @@
       });
 
       for (const entity of entities) {
+        // Just above zero: `dying > 0` means "on the way out", and step() takes
+        // it to 1 over a third of a second before the entity is dropped.
         if (!seen.has(entity.id) && entity.dying === 0) entity.dying = 0.0001;
       }
 
@@ -278,7 +280,6 @@
       layout();
 
       if (!running) draw();
-      return entities.filter((e) => !e.done && e.dying === 0).length;
     }
 
     /* ---------- particles ---------- */
@@ -367,7 +368,7 @@
       player.x += player.vx * dt;
       player.x = clamp(player.x, 6, worldW - END_PAD + 20 - player.w);
 
-      const wasFalling = player.vy;
+      const fallSpeed = player.vy;
       const prevBottom = player.y + player.h;
       player.y += player.vy * dt;
       player.grounded = false;
@@ -385,8 +386,8 @@
         player.vy = 0;
         player.grounded = true;
       }
-      if (player.grounded && wasFalling > 500) {
-        player.squash = Math.min(wasFalling / 1400, 0.45);
+      if (player.grounded && fallSpeed > 500) {
+        player.squash = Math.min(fallSpeed / 1400, 0.45);
         dust(player.x + player.w / 2, player.y + player.h, 6);
       }
 
@@ -431,7 +432,10 @@
       // Flushed last: onComplete re-enters through sync(), which reorders
       // `entities`, and that must not happen while the loops above are running.
       if (collected.length) {
-        for (const id of collected.splice(0, collected.length)) onComplete(id);
+        // Drained after the calls, not before: sync() reads this queue to tell
+        // "the store has not heard yet" from "un-ticked in the list".
+        for (const id of collected) onComplete(id);
+        collected.length = 0;
       }
     }
 
@@ -485,7 +489,7 @@
       ctx.fillRect(0, 0, viewW, viewH);
       ctx.globalAlpha = 1;
 
-      ctx.fillStyle = palette.dark ? '#ffffff' : '#ffffff';
+      ctx.fillStyle = '#ffffff';
       for (const star of stars) {
         const x = ((star.x - camera * 0.12) % 2400 + 2400) % 2400;
         if (x > viewW + 4) continue;
@@ -837,17 +841,31 @@
     function stop() {
       running = false;
       cancelAnimationFrame(raf);
+      releaseKeys();
+    }
+
+    function releaseKeys() {
+      keys.left = keys.right = keys.jump = keys.jumpHeld = false;
     }
 
     /* ---------- input ---------- */
 
-    function typing() {
+    /* The world takes the keyboard while it is on screen, but never out of
+     * something else's hands: typing wins outright, and space stays with a
+     * focused button because that is how a keyboard user presses one. */
+    const TEXT_ENTRY = 'input, textarea, select, [contenteditable=""], [contenteditable="true"]';
+    const SPACE_ACTIVATES = 'button, a[href], summary, [role="button"]';
+
+    function keysAreOurs(event) {
+      if (!onScreen) return false;
       const el = document.activeElement;
-      return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
+      if (!el || !el.matches) return true;
+      if (el.matches(TEXT_ENTRY)) return false;
+      return !(event.code === 'Space' && el.matches(SPACE_ACTIVATES));
     }
 
     function onKeyDown(event) {
-      if (typing() || event.metaKey || event.ctrlKey || event.altKey) return;
+      if (!keysAreOurs(event) || event.metaKey || event.ctrlKey || event.altKey) return;
       if (LEFT_KEYS.has(event.code)) keys.left = true;
       else if (RIGHT_KEYS.has(event.code)) keys.right = true;
       else if (JUMP_KEYS.has(event.code)) {
@@ -914,9 +932,7 @@
 
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
-    window.addEventListener('blur', () => {
-      keys.left = keys.right = keys.jump = false;
-    });
+    window.addEventListener('blur', releaseKeys);
     document.addEventListener('visibilitychange', onVisibility);
     darkQuery.addEventListener('change', onTheme);
     padQuery.addEventListener('change', resize);
@@ -967,9 +983,11 @@
         intersection.disconnect();
         window.removeEventListener('keydown', onKeyDown);
         window.removeEventListener('keyup', onKeyUp);
+        window.removeEventListener('blur', releaseKeys);
         document.removeEventListener('visibilitychange', onVisibility);
         darkQuery.removeEventListener('change', onTheme);
         padQuery.removeEventListener('change', resize);
+        calmQuery.removeEventListener('change', draw);
       },
     };
   }
