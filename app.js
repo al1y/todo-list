@@ -6,9 +6,19 @@ const list = document.getElementById('todo-list');
 const count = document.getElementById('count');
 const clearDone = document.getElementById('clear-done');
 const filterButtons = document.querySelectorAll('.filters button');
+const today = document.getElementById('today');
+const tagline = document.getElementById('tagline');
+const progress = document.getElementById('progress');
+const progressFill = document.getElementById('progress-fill');
+const confetti = document.getElementById('confetti');
+
+const calm = window.matchMedia('(prefers-reduced-motion: reduce)');
+const CONFETTI_COLORS = ['#6d4aff', '#ff4fa3', '#00d4ff', '#ffd166', '#5ce1a0'];
 
 let todos = load();
 let filter = 'all';
+let entrance = true;
+let justDoneId = null;
 
 function load() {
   try {
@@ -25,12 +35,19 @@ function save() {
 function addTodo(title) {
   todos.push({ id: crypto.randomUUID(), title, done: false });
   save();
+  entrance = true;
   render();
 }
 
-function toggleTodo(id) {
+function toggleTodo(id, origin) {
   const todo = todos.find((t) => t.id === id);
-  if (todo) todo.done = !todo.done;
+  if (todo) {
+    todo.done = !todo.done;
+    if (todo.done) {
+      justDoneId = id;
+      burst(origin, todos.every((t) => t.done) ? 60 : 16);
+    }
+  }
   save();
   render();
 }
@@ -47,6 +64,37 @@ function visibleTodos() {
   return todos;
 }
 
+function burst(origin, pieces) {
+  if (calm.matches || !origin) return;
+
+  const { left, top, width, height } = origin.getBoundingClientRect();
+  const x = left + width / 2;
+  const y = top + height / 2;
+
+  for (let i = 0; i < pieces; i++) {
+    const piece = document.createElement('span');
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 60 + Math.random() * 220;
+    piece.style.left = `${x}px`;
+    piece.style.top = `${y}px`;
+    piece.style.background = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
+    piece.style.setProperty('--dx', `${Math.cos(angle) * distance}px`);
+    piece.style.setProperty('--dy', `${Math.sin(angle) * distance + 220}px`);
+    piece.style.setProperty('--rot', `${360 + Math.random() * 720}deg`);
+    piece.style.setProperty('--dur', `${1.1 + Math.random() * 0.9}s`);
+    piece.addEventListener('animationend', () => piece.remove());
+    confetti.append(piece);
+  }
+}
+
+function taglineFor(remaining, total) {
+  if (total === 0) return 'A clean slate. What is calling?';
+  if (remaining === 0) return 'Everything done. Go and enjoy it.';
+  if (remaining === 1) return 'One last thing. Almost there.';
+  if (remaining <= 3) return `${remaining} to go. Easy work.`;
+  return `${remaining} on the list. One at a time.`;
+}
+
 function render() {
   list.replaceChildren();
 
@@ -54,19 +102,21 @@ function render() {
   if (visible.length === 0) {
     const empty = document.createElement('li');
     empty.className = 'empty';
-    empty.textContent = todos.length === 0 ? 'Nothing to do. Add something above.' : 'Nothing here.';
+    empty.textContent = todos.length === 0 ? 'Nothing here yet. Add the first one above.' : 'Nothing in this view.';
     list.append(empty);
   }
 
-  for (const todo of visible) {
+  visible.forEach((todo, index) => {
     const li = document.createElement('li');
-    li.className = 'todo' + (todo.done ? ' done' : '');
+    li.className = 'todo' + (todo.done ? ' done' : '') + (todo.id === justDoneId ? ' just-done' : '');
+    li.style.setProperty('--i', entrance ? index : 0);
+    if (!entrance && todo.id !== justDoneId) li.style.animation = 'none';
 
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.checked = todo.done;
     checkbox.setAttribute('aria-label', `Mark "${todo.title}" ${todo.done ? 'not done' : 'done'}`);
-    checkbox.addEventListener('change', () => toggleTodo(todo.id));
+    checkbox.addEventListener('change', () => toggleTodo(todo.id, checkbox));
 
     const title = document.createElement('span');
     title.className = 'title';
@@ -80,15 +130,23 @@ function render() {
 
     li.append(checkbox, title, remove);
     list.append(li);
-  }
+  });
 
   const remaining = todos.filter((t) => !t.done).length;
+  const percent = todos.length === 0 ? 0 : Math.round(((todos.length - remaining) / todos.length) * 100);
+
   count.textContent = `${remaining} item${remaining === 1 ? '' : 's'} left`;
+  tagline.textContent = taglineFor(remaining, todos.length);
+  progressFill.style.width = `${percent}%`;
+  progress.setAttribute('aria-valuenow', percent);
   clearDone.hidden = todos.every((t) => !t.done);
 
   for (const button of filterButtons) {
     button.classList.toggle('active', button.dataset.filter === filter);
   }
+
+  entrance = false;
+  justDoneId = null;
 }
 
 form.addEventListener('submit', (event) => {
@@ -109,8 +167,11 @@ clearDone.addEventListener('click', () => {
 for (const button of filterButtons) {
   button.addEventListener('click', () => {
     filter = button.dataset.filter;
+    entrance = true;
     render();
   });
 }
+
+today.textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
 
 render();

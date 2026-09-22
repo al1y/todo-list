@@ -3,16 +3,32 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Todo</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%230969da%27/%3E%3Cpath d=%27M9 16l5 5 9-10%27 fill=%27none%27 stroke=%27%23fff%27 stroke-width=%273.5%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E" />
+  <meta name="theme-color" content="#0b0716" />
+  <title>Today</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Cdefs%3E%3ClinearGradient id=%27g%27 x1=%270%27 y1=%270%27 x2=%271%27 y2=%271%27%3E%3Cstop offset=%270%27 stop-color=%27%237c5cff%27/%3E%3Cstop offset=%271%27 stop-color=%27%23ff5ca8%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%2732%27 height=%2732%27 rx=%279%27 fill=%27url(%23g)%27/%3E%3Cpath d=%27M9 16l5 5 9-10%27 fill=%27none%27 stroke=%27%23fff%27 stroke-width=%273.5%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div class="aurora" aria-hidden="true">
+    <span class="blob blob-a"></span>
+    <span class="blob blob-b"></span>
+    <span class="blob blob-c"></span>
+    <span class="grain"></span>
+  </div>
+
   <main class="app">
-    <h1>Todo</h1>
+    <header class="hero">
+      <p class="eyebrow" id="today"></p>
+      <h1>Today<span class="dot">.</span></h1>
+      <p class="tagline" id="tagline">Let's make it a good one.</p>
+
+      <div class="progress" id="progress" role="progressbar" aria-label="Progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <span class="progress-fill" id="progress-fill"></span>
+      </div>
+    </header>
 
     <form id="new-todo-form" class="new-todo" autocomplete="off">
-      <input id="new-todo-input" type="text" placeholder="What needs doing?" aria-label="New todo" required />
+      <input id="new-todo-input" type="text" placeholder="What are we doing today?" aria-label="New todo" required />
       <button type="submit">Add</button>
     </form>
 
@@ -30,8 +46,8 @@
     <button id="clear-done" class="clear-completed">Clear completed</button>
   </main>
 
+  <div class="confetti" id="confetti" aria-hidden="true"></div>
+
   <script src="app.js"></script>
 </body>
 </html>
-
-<!-- larger header + footer per review -->
