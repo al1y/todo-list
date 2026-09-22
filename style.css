@@ -20,6 +20,26 @@
   }
 }
 
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --card: #161b22;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --border: #30363d;
+  --accent: #58a6ff;
+  --danger: #ff7b72;
+}
+
+:root[data-theme="light"] {
+  --bg: #f6f7f9;
+  --card: #ffffff;
+  --text: #1f2328;
+  --muted: #6e7781;
+  --border: #d0d7de;
+  --accent: #0969da;
+  --danger: #cf222e;
+}
+
 * { box-sizing: border-box; }
 
 body {
@@ -42,7 +62,21 @@ body {
   padding: 1.5rem;
 }
 
-h1 { margin: 0 0 1rem; font-size: 1.5rem; }
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+h1 { margin: 0; font-size: 1.5rem; }
+
+.theme-toggle {
+  padding: 0.4rem 0.6rem;
+  font-size: 1rem;
+  line-height: 1;
+}
 
 .new-todo { display: flex; gap: 0.5rem; }
 

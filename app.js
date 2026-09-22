@@ -1,5 +1,7 @@
 const STORAGE_KEY = 'todos.v1';
+const THEME_KEY = 'theme';
 
+const themeToggle = document.getElementById('theme-toggle');
 const form = document.getElementById('new-todo-form');
 const input = document.getElementById('new-todo-input');
 const list = document.getElementById('todo-list');
@@ -113,4 +115,23 @@ for (const button of filterButtons) {
   });
 }
 
+function currentTheme() {
+  const saved = document.documentElement.getAttribute('data-theme');
+  if (saved === 'dark' || saved === 'light') return saved;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem(THEME_KEY, theme);
+  themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+  themeToggle.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+  themeToggle.setAttribute('aria-pressed', String(theme === 'dark'));
+}
+
+themeToggle.addEventListener('click', () => {
+  applyTheme(currentTheme() === 'dark' ? 'light' : 'dark');
+});
+
+applyTheme(currentTheme());
 render();
