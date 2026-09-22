@@ -11,6 +11,10 @@ const tagline = document.getElementById('tagline');
 const progress = document.getElementById('progress');
 const progressFill = document.getElementById('progress-fill');
 const confetti = document.getElementById('confetti');
+const stage = document.querySelector('.stage-frame');
+const stageStatus = document.getElementById('stage-status');
+const stageBanner = document.getElementById('stage-banner');
+const canvas = document.getElementById('quest');
 
 const calm = window.matchMedia('(prefers-reduced-motion: reduce)');
 const CONFETTI_COLORS = ['#6d4aff', '#ff4fa3', '#00d4ff', '#ffd166', '#5ce1a0'];
@@ -19,6 +23,15 @@ let todos = load();
 let filter = 'all';
 let entrance = true;
 let justDoneId = null;
+let allDone = todos.length > 0 && todos.every((t) => t.done);
+
+const game = window.TodoQuest.create({
+  canvas,
+  padLeft: document.getElementById('pad-left'),
+  padRight: document.getElementById('pad-right'),
+  padJump: document.getElementById('pad-jump'),
+  onComplete: (id) => setDone(id, true, null),
+});
 
 function load() {
   try {
@@ -39,16 +52,25 @@ function addTodo(title) {
   render();
 }
 
-function toggleTodo(id, origin) {
+/* Completion has two doors — the crystal in the world and the checkbox in the
+ * list — so both funnel through here and the celebration only fires once. */
+function setDone(id, done, origin) {
   const todo = todos.find((t) => t.id === id);
-  if (todo) {
-    todo.done = !todo.done;
-    if (todo.done) {
-      justDoneId = id;
-      burst(origin, todos.every((t) => t.done) ? 60 : 16);
-    }
-  }
+  if (!todo || todo.done === done) return;
+
+  todo.done = done;
+  if (done) justDoneId = id;
   save();
+
+  const nowAllDone = todos.length > 0 && todos.every((t) => t.done);
+  if (done && nowAllDone && !allDone) {
+    burst(stage, 70);
+    game.celebrate();
+  } else if (done) {
+    // A crystal reached in-game shatters on the canvas already; no origin, no confetti.
+    burst(origin, 16);
+  }
+
   render();
 }
 
@@ -116,11 +138,19 @@ function render() {
     checkbox.type = 'checkbox';
     checkbox.checked = todo.done;
     checkbox.setAttribute('aria-label', `Mark "${todo.title}" ${todo.done ? 'not done' : 'done'}`);
-    checkbox.addEventListener('change', () => toggleTodo(todo.id, checkbox));
+    checkbox.addEventListener('change', () => setDone(todo.id, checkbox.checked, checkbox));
 
-    const title = document.createElement('span');
+    const title = document.createElement(todo.done ? 'span' : 'button');
     title.className = 'title';
     title.textContent = todo.title;
+    if (!todo.done) {
+      title.type = 'button';
+      title.setAttribute('aria-label', `Go to "${todo.title}" in the task world`);
+      title.addEventListener('click', () => {
+        game.focusOn(todo.id);
+        stage.scrollIntoView({ block: 'nearest', behavior: calm.matches ? 'auto' : 'smooth' });
+      });
+    }
 
     const remove = document.createElement('button');
     remove.className = 'remove';
@@ -144,6 +174,18 @@ function render() {
   for (const button of filterButtons) {
     button.classList.toggle('active', button.dataset.filter === filter);
   }
+
+  game.sync(todos);
+  const crystals = `${remaining} crystal${remaining === 1 ? '' : 's'} left`;
+  stageStatus.textContent = todos.length === 0 ? 'No crystals yet' : remaining === 0 ? 'All clear' : crystals;
+  canvas.setAttribute(
+    'aria-label',
+    todos.length === 0
+      ? 'An empty world. Add a todo to put the first crystal in it.'
+      : `A side-scrolling world with ${crystals} to reach.`,
+  );
+  allDone = todos.length > 0 && remaining === 0;
+  stageBanner.hidden = !allDone;
 
   entrance = false;
   justDoneId = null;
